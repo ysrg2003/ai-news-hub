@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, articles, categories, tags, articleTags } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,111 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+/**
+ * Article queries
+ */
+export async function createArticle(
+  data: {
+    title: string;
+    slug: string;
+    excerpt: string;
+    content: string;
+    categoryId: number;
+    authorName: string;
+    articleType: "trending" | "evergreen";
+    image: string;
+    imageAltText: string;
+    metaTitle: string;
+    metaDescription: string;
+    readTime: number;
+    conceptualIcon: string;
+    tags: string[];
+  }
+) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  try {
+    // Insert article
+    const result = await db.insert(articles).values({
+      title: data.title,
+      slug: data.slug,
+      excerpt: data.excerpt,
+      content: data.content,
+      categoryId: data.categoryId,
+      authorName: data.authorName,
+      articleType: data.articleType,
+      image: data.image,
+      imageAltText: data.imageAltText,
+      metaTitle: data.metaTitle,
+      metaDescription: data.metaDescription,
+      readTime: data.readTime,
+      conceptualIcon: data.conceptualIcon,
+    });
+
+    // Get the inserted article ID
+    const articleId = (result as any).insertId;
+
+    // Insert tags
+    for (const tagName of data.tags) {
+      const tagSlug = tagName.toLowerCase().replace(/\s+/g, "-");
+      await db.insert(tags).values({ name: tagName, slug: tagSlug }).onDuplicateKeyUpdate({ set: {} });
+      const tag = await db.select().from(tags).where(eq(tags.name, tagName)).limit(1);
+      if (tag.length > 0) {
+        await db.insert(articleTags).values({ articleId, tagId: tag[0].id });
+      }
+    }
+
+    return articleId;
+  } catch (error) {
+    console.error("Error creating article:", error);
+    throw error;
+  }
+}
+
+export async function getArticleBySlug(slug: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(articles).where(eq(articles.slug, slug)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getArticlesByCategory(categoryId: number, limit: number = 10, offset: number = 0) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select()
+    .from(articles)
+    .where(eq(articles.categoryId, categoryId))
+    .orderBy(desc(articles.createdAt))
+    .limit(limit)
+    .offset(offset);
+}
+
+export async function getAllArticles(limit: number = 20, offset: number = 0) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(articles).orderBy(desc(articles.createdAt)).limit(limit).offset(offset);
+}
+
+export async function getCategories() {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(categories);
+}
+
+export async function getCategoryBySlug(slug: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(categories).where(eq(categories.slug, slug)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+
