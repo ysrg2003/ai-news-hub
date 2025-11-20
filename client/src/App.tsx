@@ -10,6 +10,9 @@ import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Contact from "./pages/Contact";
 import About from "./pages/About";
+import Category from "./pages/Category";
+import Search from "./pages/Search";
+import Archive from "./pages/Archive";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -17,6 +20,9 @@ function Router() {
     <Switch>
       <Route path={"\\"} component={Home} />
       <Route path={"/article/:slug"} component={Article} />
+      <Route path={"/category/:slug"} component={Category} />
+      <Route path={"/search"} component={Search} />
+      <Route path={"/archive"} component={Archive} />
       <Route path={"/privacy"} component={Privacy} />
       <Route path={"/terms"} component={Terms} />
       <Route path={"/contact"} component={Contact} />

@@ -1,0 +1,28 @@
+User-agent: *
+Allow: /
+Allow: /article/
+Allow: /category/
+Allow: /archive/
+Allow: /search/
+
+Disallow: /admin/
+Disallow: /api/
+Disallow: /private/
+
+Sitemap: https://ainewshub.com/sitemap.xml
+
+# Crawl delay to prevent server overload
+Crawl-delay: 1
+
+# Allow specific search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
