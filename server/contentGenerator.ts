@@ -254,6 +254,44 @@ export async function generateArticle(
 }
 
 /**
+ * Validate article response
+ */
+export function validateArticleResponse(response: any): boolean {
+  if (!response || typeof response !== "object") {
+    return false;
+  }
+
+  const { title, excerpt, content, keywords, readTime } = response;
+
+  // Validate title
+  if (!title || typeof title !== "string" || title.length < 10 || title.length > 200) {
+    return false;
+  }
+
+  // Validate excerpt
+  if (!excerpt || typeof excerpt !== "string" || excerpt.length < 50 || excerpt.length > 300) {
+    return false;
+  }
+
+  // Validate content
+  if (!content || typeof content !== "string" || content.length < 100) {
+    return false;
+  }
+
+  // Validate keywords
+  if (!Array.isArray(keywords) || keywords.length === 0) {
+    return false;
+  }
+
+  // Validate read time
+  if (typeof readTime !== "number" || readTime < 1 || readTime > 60) {
+    return false;
+  }
+
+  return true;
+}
+
+/**
  * Generate multiple articles with rate limiting
  */
 export async function generateArticlesBatch(

@@ -342,3 +342,12 @@ export function generateImageDataUrl(svg: string): string {
   const base64 = svgToBase64(svg);
   return `data:image/svg+xml;base64,${base64}`;
 }
+
+/**
+ * Generate cover image (alias for generateArticleCoverImage)
+ */
+export function generateCoverImage(category: string, title: string): string {
+  const categorySlug = category.toLowerCase().replace(/\s+/g, "-");
+  const svg = generateArticleCoverImage(title, categorySlug, "brain");
+  return generateImageDataUrl(svg);
+}
