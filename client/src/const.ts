@@ -1,11 +1,11 @@
 export { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 
-export const APP_TITLE = import.meta.env.VITE_APP_TITLE || "AI News Hub";
+export const APP_TITLE = import.meta.env.VITE_APP_TITLE || "Daily AI Hub";
 
 export const APP_LOGO = import.meta.env.VITE_APP_LOGO || "https://placehold.co/128x128/6366f1/ffffff?text=AI";
 
 export const APP_DESCRIPTION =
-  "Stay updated with the latest AI news, trends, and breakthroughs. Daily articles covering Machine Learning, NLP, Computer Vision, Robotics, and more.";
+  "Daily AI news, research, and insights covering Machine Learning, NLP, Computer Vision, Robotics, Generative AI, and more. Stay informed with the latest AI trends and breakthroughs.";
 
 // Categories
 export const CATEGORIES = [
