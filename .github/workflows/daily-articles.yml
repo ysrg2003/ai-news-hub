@@ -2,14 +2,14 @@ name: Daily Article Generation
 
 on:
   schedule:
-    # Run at 9 AM UTC every day (adjust timezone as needed)
-    - cron: '0 9 * * *'
-  workflow_dispatch: # Allow manual trigger
+    # Run at 2 AM UTC daily (generates 16 articles)
+    - cron: '0 2 * * *'
+  workflow_dispatch:
 
 jobs:
   generate-articles:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 120
 
     steps:
       - name: Checkout repository
@@ -29,76 +29,29 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Generate daily articles
+      - name: Generate articles
+        run: node scripts/daily-generate-articles.mjs
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          VITE_APP_ID: ${{ secrets.VITE_APP_ID }}
-          OAUTH_SERVER_URL: ${{ secrets.OAUTH_SERVER_URL }}
-          VITE_OAUTH_PORTAL_URL: ${{ secrets.VITE_OAUTH_PORTAL_URL }}
-          OWNER_OPEN_ID: ${{ secrets.OWNER_OPEN_ID }}
-          OWNER_NAME: ${{ secrets.OWNER_NAME }}
-          VITE_APP_TITLE: ${{ secrets.VITE_APP_TITLE }}
-          VITE_APP_LOGO: ${{ secrets.VITE_APP_LOGO }}
-          BUILT_IN_FORGE_API_URL: ${{ secrets.BUILT_IN_FORGE_API_URL }}
-          BUILT_IN_FORGE_API_KEY: ${{ secrets.BUILT_IN_FORGE_API_KEY }}
-          VITE_FRONTEND_FORGE_API_KEY: ${{ secrets.VITE_FRONTEND_FORGE_API_KEY }}
-          VITE_FRONTEND_FORGE_API_URL: ${{ secrets.VITE_FRONTEND_FORGE_API_URL }}
-        run: pnpm run generate:articles
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
-      - name: Notify on success
-        if: success()
-        run: echo "✅ Daily articles generated successfully"
+      - name: Update Sitemap
+        run: node scripts/update-sitemaps.mjs
 
-      - name: Notify on failure
-        if: failure()
-        run: echo "❌ Daily article generation failed"
+      - name: Commit changes
+        run: |
+          git config user.name "Daily AI Hub Bot"
+          git config user.email "bot@dailyaihub.com"
+          git add -A
+          git commit -m "chore: daily article generation and sitemap update" || true
 
-  process-jobs:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'pnpm'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 10
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Process pending jobs
+      - name: Push changes
+        run: git push origin main
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          VITE_APP_ID: ${{ secrets.VITE_APP_ID }}
-          OAUTH_SERVER_URL: ${{ secrets.OAUTH_SERVER_URL }}
-          VITE_OAUTH_PORTAL_URL: ${{ secrets.VITE_OAUTH_PORTAL_URL }}
-          OWNER_OPEN_ID: ${{ secrets.OWNER_OPEN_ID }}
-          OWNER_NAME: ${{ secrets.OWNER_NAME }}
-          VITE_APP_TITLE: ${{ secrets.VITE_APP_TITLE }}
-          VITE_APP_LOGO: ${{ secrets.VITE_APP_LOGO }}
-          BUILT_IN_FORGE_API_URL: ${{ secrets.BUILT_IN_FORGE_API_URL }}
-          BUILT_IN_FORGE_API_KEY: ${{ secrets.BUILT_IN_FORGE_API_KEY }}
-          VITE_FRONTEND_FORGE_API_KEY: ${{ secrets.VITE_FRONTEND_FORGE_API_KEY }}
-          VITE_FRONTEND_FORGE_API_URL: ${{ secrets.VITE_FRONTEND_FORGE_API_URL }}
-        run: pnpm run process:jobs
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Notify on success
-        if: success()
-        run: echo "✅ Pending jobs processed successfully"
-
-      - name: Notify on failure
-        if: failure()
-        run: echo "❌ Job processing failed"
+      - name: Send notification
+        if: always()
+        run: |
+          echo "Daily article generation completed"
+          echo "Status: ${{ job.status }}"
