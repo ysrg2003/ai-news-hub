@@ -1,4 +1,4 @@
-import { invokeLLM } from "./server/_core/llm";
+import { invokeLLM } from './_core/llm';
 import { z } from "zod";
 
 /**
@@ -91,7 +91,8 @@ Return ONLY valid JSON matching this structure:
     });
 
     const content = response.choices[0]?.message.content || "{}";
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    const contentStr = typeof content === 'string' ? content : JSON.stringify(content);
+    const jsonMatch = contentStr.match(/\{[\s\S]*\}/);
     const jsonStr = jsonMatch ? jsonMatch[0] : "{}";
     const parsed = JSON.parse(jsonStr);
 
@@ -143,7 +144,8 @@ Create a well-structured, engaging article that explores the story in depth.`;
     });
 
     const content = response.choices[0]?.message.content || "{}";
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    const contentStr = typeof content === 'string' ? content : JSON.stringify(content);
+    const jsonMatch = contentStr.match(/\{[\s\S]*\}/);
     const jsonStr = jsonMatch ? jsonMatch[0] : "{}";
     const parsed = JSON.parse(jsonStr);
 
@@ -195,7 +197,8 @@ Improve the title, create a meta description, identify keywords, and suggest int
     });
 
     const content = response.choices[0]?.message.content || "{}";
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    const contentStr = typeof content === 'string' ? content : JSON.stringify(content);
+    const jsonMatch = contentStr.match(/\{[\s\S]*\}/);
     const jsonStr = jsonMatch ? jsonMatch[0] : "{}";
     const parsed = JSON.parse(jsonStr);
 
@@ -250,7 +253,8 @@ Provide a quality assessment and final approval recommendation.`;
     });
 
     const content = response.choices[0]?.message.content || "{}";
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    const contentStr = typeof content === 'string' ? content : JSON.stringify(content);
+    const jsonMatch = contentStr.match(/\{[\s\S]*\}/);
     const jsonStr = jsonMatch ? jsonMatch[0] : "{}";
     const parsed = JSON.parse(jsonStr);
 
